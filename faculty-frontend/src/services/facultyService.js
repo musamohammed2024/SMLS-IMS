@@ -4,7 +4,7 @@ import { getToken } from "../utils/auth";
 
 
 const API =
-"http://localhost:5000/api/faculty";
+`${import.meta.env.VITE_API_URL}/faculty`;
 
 
 

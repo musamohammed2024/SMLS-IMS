@@ -7,7 +7,7 @@ import { countries as countryData } from "country-data";
 
 import { getToken } from "../utils/auth";
 
-const API = "http://localhost:5000/api/faculty";
+const API = `${import.meta.env.VITE_API_URL}/faculty`;
 
 const countryOptions = countryList().getData();
 
@@ -348,7 +348,7 @@ return (
           formData.photo ? (
 
             <img
-              src={`http://localhost:5000${formData.photo}`}
+              src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${formData.photo}`}
               alt="Faculty"
               style={styles.photo}
             />

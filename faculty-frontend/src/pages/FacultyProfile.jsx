@@ -15,7 +15,7 @@ import {
 } from "../utils/auth";
 
 
-const API = "http://localhost:5000/api/faculty";
+const API = `${import.meta.env.VITE_API_URL}/faculty`;
 
 
 export default function FacultyProfile() {
@@ -146,7 +146,7 @@ export default function FacultyProfile() {
 
           <img
 
-            src={`http://localhost:5000${faculty.photo}`}
+           src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${faculty.photo}`}
 
             style={styles.photo}
 

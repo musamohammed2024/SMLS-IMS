@@ -4,7 +4,7 @@ import { getToken } from "../utils/auth";
 
 const API = axios.create({
 
-  baseURL: "http://localhost:5000/api/reports",
+  baseURL: `${import.meta.env.VITE_API_URL}/reports`,
 
 });
 
@@ -63,7 +63,7 @@ export const getStatisticsReport = async () => {
 
   const res = await axios.get(
 
-    "http://localhost:5000/api/stats",
+    `${import.meta.env.VITE_API_URL}/stats`,
 
     getAuthHeaders()
 

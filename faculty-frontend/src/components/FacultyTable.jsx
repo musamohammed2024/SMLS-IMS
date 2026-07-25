@@ -270,7 +270,7 @@ export default function FacultyTable({
                   <td style={styles.td}>
                     {item.photo ? (
                       <img
-                        src={`http://localhost:5000${item.photo}`}
+                        src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${item.photo}`}
                         alt="Faculty"
                         style={styles.photo}
                       />
