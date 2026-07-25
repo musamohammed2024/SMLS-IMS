@@ -1,0 +1,78 @@
+/* ================================
+   SMLS / FMIS GLOBAL STYLES
+   ================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  background: #f1f5f9;
+  color: #1e293b;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* Remove default button differences */
+
+button {
+  font-family: inherit;
+}
+
+
+/* Links */
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+
+/* Scrollbar improvement */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e2e8f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+
+/* Code formatting (if needed later) */
+
+code {
+  font-family:
+    "Source Code Pro",
+    Menlo,
+    Monaco,
+    Consolas,
+    "Courier New",
+    monospace;
+}
