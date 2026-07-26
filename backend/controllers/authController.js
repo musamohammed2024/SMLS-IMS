@@ -87,8 +87,7 @@ const registerUser = async (req,res)=>{
 
     });
 
-    console.log("Login email:", cleanEmail);
-console.log("User found:", user ? "YES" : "NO");
+
 
 
     if(existingUser){
