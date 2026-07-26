@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { createFaculty } from "../services/facultyService";
 
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-
 
 
 
@@ -14,6 +13,17 @@ export default function AddFaculty() {
   const navigate = useNavigate();
 
 
+  // ===============================
+  // PHOTO REF
+  // ===============================
+
+  const fileInputRef = useRef(null);
+
+
+
+  // ===============================
+  // FORM DATA
+  // ===============================
 
   const [form, setForm] = useState({
 
@@ -36,17 +46,16 @@ export default function AddFaculty() {
     serviceYear: 0,
 
 
-    // ==========================
-    // PUBLICATIONS
-    // ==========================
+    // Publications
 
-   publicationsByYear: {},
+    publicationsByYear: {},
 
     totalPublications: 0,
 
 
-   country: "Ethiopia",
-   telephone: "",
+    country: "Ethiopia",
+
+    telephone: "",
 
     email: "",
 
@@ -58,17 +67,23 @@ export default function AddFaculty() {
 
 
 
+  // ===============================
+  // PHOTO STATES
+  // ===============================
+
   const [photo, setPhoto] = useState(null);
+
+  const [photoPreview, setPhotoPreview] = useState(null);
+
 
 
   const [loading, setLoading] = useState(false);
 
 
 
-  // ==========================
-  // Publication Controls
-  // ==========================
-
+  // ===============================
+  // PUBLICATION STATES
+  // ===============================
 
   const [showPublications, setShowPublications] =
     useState(false);
@@ -81,70 +96,125 @@ export default function AddFaculty() {
 
 
 
-
-  // ==========================
-  // Automatic Years
-  // 2010 - 10 years future
-  // ==========================
+  // ===============================
+  // YEARS
+  // ===============================
 
 
   const startYear = 2010;
 
 
-  const currentYear =
-    new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
 
 
 
-  const publicationYears =
-    Array.from(
+  const publicationYears = Array.from(
 
-      {
-        length:
-          currentYear + 10 - startYear + 1
-      },
+    {
+      length:
+        currentYear + 10 - startYear + 1
+    },
 
-      (_, index) =>
-        startYear + index
+    (_, index) =>
+      startYear + index
 
-    );
-
+  );
 
 
 
-
-  // ==========================
-  // Normal Input Change
-  // ==========================
+  // ===============================
+  // INPUT CHANGE
+  // ===============================
 
 
   const handleChange = (e)=>{
 
-  const { name, value, files } = e.target;
 
-  setForm({
-
-    ...form,
-
-    [name]: files ? files[0] : value
-
-  });
-
-};
+    const {name,value} = e.target;
 
 
+    setForm({
+
+      ...form,
+
+      [name]: value
+
+    });
 
 
-  // ==========================
-  // Submit
-  // ==========================
+  };
+
+
+
+  // ===============================
+  // PHOTO SELECT
+  // ===============================
+
+
+  const handlePhotoChange = (e)=>{
+
+
+    const selectedPhoto =
+      e.target.files[0];
+
+
+
+    if(selectedPhoto){
+
+
+      setPhoto(selectedPhoto);
+
+
+
+      setPhotoPreview(
+
+        URL.createObjectURL(selectedPhoto)
+
+      );
+
+
+    }
+
+
+  };
+
+
+
+  // ===============================
+  // REMOVE PHOTO
+  // ===============================
+
+
+  const removePhoto = ()=>{
+
+
+    setPhoto(null);
+
+
+    setPhotoPreview(null);
+
+
+
+    if(fileInputRef.current){
+
+      fileInputRef.current.value = "";
+
+    }
+
+
+  };
+
+
+
+  // ===============================
+  // SUBMIT
+  // ===============================
 
 
   const handleSubmit = async(e)=>{
 
 
     e.preventDefault();
-
 
 
     try{
@@ -154,26 +224,57 @@ export default function AddFaculty() {
 
 
 
-      const data =
-        new FormData();
+      const data = new FormData();
 
 
 
-      Object.entries(form).forEach(([key, value]) => {
-  if (key === "publicationsByYear") {
-    data.append(key, JSON.stringify(value));
-  } else {
-    data.append(key, value);
-  }
-});
+      Object.entries(form).forEach(([key,value])=>{
+
+
+        if(key==="publicationsByYear"){
+
+
+          data.append(
+
+            key,
+
+            JSON.stringify(value)
+
+          );
+
+
+        }
+
+        else{
+
+
+          data.append(
+
+            key,
+
+            value
+
+          );
+
+
+        }
+
+
+      });
+
 
 
       if(photo){
 
+
         data.append(
+
           "photo",
+
           photo
+
         );
+
 
       }
 
@@ -184,7 +285,9 @@ export default function AddFaculty() {
 
 
       alert(
+
         "Faculty added successfully"
+
       );
 
 
@@ -194,21 +297,32 @@ export default function AddFaculty() {
 
 
     }
-   catch (error) {
 
-  console.log("FULL ERROR");
-  console.log(error);
+    catch(error){
 
-  console.log("SERVER RESPONSE");
-  console.log(error.response);
 
-  console.log("SERVER DATA");
-  console.log(error.response?.data);
+      console.log(
 
-  alert(
-    JSON.stringify(error.response?.data || error.message)
-  );
-}
+        "ERROR:",
+
+        error
+
+      );
+
+
+
+      alert(
+
+        error.response?.data?.message ||
+
+        error.message
+
+      );
+
+
+    }
+
+
     finally{
 
 
@@ -220,8 +334,7 @@ export default function AddFaculty() {
 
   };
 
-
-  return (
+    return (
 
     <div>
 
@@ -245,77 +358,111 @@ export default function AddFaculty() {
 
 
         {/* ==========================
-            PHOTO
+            PHOTO UPLOAD
         ========================== */}
+
 
         <label style={styles.label}>
           Photo
         </label>
 
 
+
         <input
-  style={styles.input}
-  type="file"
-  accept="image/*"
-  onChange={(e)=>{
-    setPhoto(e.target.files[0]);
-  }}
-/>
+
+          ref={fileInputRef}
+
+          style={styles.input}
+
+          type="file"
+
+          accept="image/*"
+
+          onChange={handlePhotoChange}
+
+        />
 
 
-{photo && (
 
-<div
-style={{
-  marginTop:"15px",
-  display:"flex",
-  alignItems:"center",
-  gap:"15px"
-}}
->
-
-<img
-
-src={URL.createObjectURL(photo)}
-
-alt="Preview"
-
-style={{
-  width:"80px",
-  height:"80px",
-  borderRadius:"50%",
-  objectFit:"cover",
-  border:"2px solid #2563eb"
-}}
-
-/>
+        {photoPreview && (
 
 
-<button
+          <div
 
-type="button"
+            style={{
 
-onClick={()=>setPhoto(null)}
+              marginTop:"15px",
 
-style={{
-background:"#dc2626",
-color:"#fff",
-border:"none",
-padding:"8px 15px",
-borderRadius:"6px",
-cursor:"pointer"
-}}
+              display:"flex",
 
->
+              alignItems:"center",
 
-Remove Photo
+              gap:"15px"
 
-</button>
+            }}
+
+          >
 
 
-</div>
 
-)}
+            <img
+
+              src={photoPreview}
+
+              alt="Preview"
+
+              style={{
+
+                width:"100px",
+
+                height:"100px",
+
+                borderRadius:"50%",
+
+                objectFit:"cover",
+
+                border:"2px solid #2563eb"
+
+              }}
+
+            />
+
+
+
+            <button
+
+              type="button"
+
+              onClick={removePhoto}
+
+              style={{
+
+                background:"#dc2626",
+
+                color:"#fff",
+
+                border:"none",
+
+                padding:"10px 15px",
+
+                borderRadius:"6px",
+
+                cursor:"pointer"
+
+              }}
+
+            >
+
+              Remove Photo
+
+            </button>
+
+
+          </div>
+
+
+        )}
+
 
 
 
@@ -324,6 +471,7 @@ Remove Photo
         {/* ==========================
             FULL NAME
         ========================== */}
+
 
         <label style={styles.label}>
           Full Name
@@ -360,6 +508,7 @@ Remove Photo
         </label>
 
 
+
         <select
 
           style={styles.input}
@@ -376,32 +525,39 @@ Remove Photo
 
 
           <option value="">
-  Select Title
-</option>
+            Select Title
+          </option>
 
-<option value="Professor">
-  Professor
-</option>
 
-<option value="Dr.">
-  Dr.
-</option>
+          <option value="Professor">
+            Professor
+          </option>
 
-<option value="Mr.">
-  Mr.
-</option>
 
-<option value="Mrs.">
-  Mrs.
-</option>
+          <option value="Dr.">
+            Dr.
+          </option>
 
-<option value="Ms.">
-  Ms.
-</option>
 
-<option value="Miss">
-  Miss
-</option>
+          <option value="Mr.">
+            Mr.
+          </option>
+
+
+          <option value="Mrs.">
+            Mrs.
+          </option>
+
+
+          <option value="Ms.">
+            Ms.
+          </option>
+
+
+          <option value="Miss">
+            Miss
+          </option>
+
 
         </select>
 
@@ -417,6 +573,7 @@ Remove Photo
         <label style={styles.label}>
           Gender
         </label>
+
 
 
         <select
@@ -481,7 +638,7 @@ Remove Photo
 
           <option value="Postdoctoral">
             Postdoctoral
-            </option>
+          </option>
 
 
           <option value="PhD">
@@ -516,7 +673,7 @@ Remove Photo
 
 
         {/* ==========================
-            SPECIALIZATION
+            FIELD OF SPECIALIZATION
         ========================== */}
 
 
@@ -696,7 +853,7 @@ Remove Photo
 
 
         {/* ==========================
-            TEACHING LOAD
+            SEMESTER LOAD
         ========================== */}
 
 
@@ -752,6 +909,7 @@ Remove Photo
           min="0"
 
         />
+
                 {/* ==========================
             PUBLICATION SECTION
         ========================== */}
@@ -770,270 +928,192 @@ Remove Photo
           style={styles.secondaryButton}
 
           onClick={() =>
-            setShowPublications(
-              !showPublications
-            )
+            setShowPublications(!showPublications)
           }
 
         >
 
-          {
-
-            showPublications
-
+          {showPublications
             ? "Hide Publication Records"
-
-            : "+ Add Yearly Publications"
-
-          }
-
+            : "+ Add Yearly Publications"}
 
         </button>
 
 
 
 
+        {showPublications && (
 
-        {
-
-          showPublications && (
-
-
-            <div style={styles.publicationBox}>
+          <div style={styles.publicationBox}>
 
 
-              <label style={styles.label}>
-                Select Publication Year
-              </label>
+            <label style={styles.label}>
+              Select Publication Year
+            </label>
 
 
 
+            <select
 
-              <select
+              style={styles.input}
 
-                style={styles.input}
+              onChange={(e)=>{
 
-
-                onChange={(e)=>{
-
-
-                  const year =
-                    e.target.value;
+                const year = e.target.value;
 
 
+                if(
+                  year &&
+                  !selectedPublicationYears.includes(year)
+                ){
 
-                  if(
+                  setSelectedPublicationYears([
 
-                    year &&
+                    ...selectedPublicationYears,
 
-                    !selectedPublicationYears.includes(year)
+                    year
 
-                  ){
-
-
-                    setSelectedPublicationYears([
-
-                      ...selectedPublicationYears,
-
-                      year
-
-                    ]);
-
-
-                  }
-
-
-
-                  e.target.value="";
-
-
-                }}
-
-
-              >
-
-
-                <option value="">
-                  Select Year
-                </option>
-
-
-
-                {
-
-                  publicationYears.map((year)=>(
-
-
-                    <option
-
-                      key={year}
-
-                      value={year}
-
-                    >
-
-                      {year}
-
-
-                    </option>
-
-
-                  ))
+                  ]);
 
                 }
 
 
-              </select>
+                e.target.value="";
 
+              }}
 
+            >
 
 
+              <option value="">
+                Select Year
+              </option>
 
 
-              {
 
-                selectedPublicationYears.map((year)=>(
+              {publicationYears.map((year)=>(
 
+                <option
 
+                  key={year}
 
-                  <div key={year}>
+                  value={year}
 
+                >
 
-                    <label style={styles.label}>
+                  {year}
 
-                      {year} Publications
+                </option>
 
-                    </label>
+              ))}
 
 
+            </select>
 
 
-                    <input
 
-                      style={styles.input}
 
-                      type="number"
+            {selectedPublicationYears.map((year)=>(
 
-                      min="0"
 
+              <div key={year}>
 
 
-                      value={
+                <label style={styles.label}>
 
-                        form.publicationsByYear[year]
+                  {year} Publications
 
-                        || ""
+                </label>
 
-                      }
 
 
+                <input
 
-                      onChange={(e)=>{
+                  style={styles.input}
 
+                  type="number"
 
-                        const updatedPublications = {
+                  min="0"
 
 
-                          ...form.publicationsByYear,
+                  value={
+                    form.publicationsByYear[year] || ""
+                  }
 
 
 
-                          [year]:
+                  onChange={(e)=>{
 
-                            e.target.value === ""
 
-                            ? 0
+                    const updated = {
 
-                            : Number(
-                                e.target.value
-                              )
 
+                      ...form.publicationsByYear,
 
-                        };
 
+                      [year]:
 
+                      e.target.value === ""
 
+                      ? 0
 
+                      : Number(e.target.value)
 
-                        const total =
 
-                          Object.values(
+                    };
 
-                            updatedPublications
 
-                          )
 
-                          .reduce(
+                    const total =
 
-                            (sum,value)=>
+                      Object.values(updated)
 
-                              sum + value,
+                      .reduce(
 
-                            0
+                        (sum,value)=>
 
-                          );
+                          sum + value,
 
+                        0
 
+                      );
 
 
 
+                    setForm({
 
-                        setForm({
+                      ...form,
 
+                      publicationsByYear: updated,
 
-                          ...form,
+                      totalPublications: total
 
+                    });
 
 
-                          publicationsByYear:
 
-                            updatedPublications,
+                  }}
 
 
+                />
 
-                          totalPublications:
 
-                            total
+              </div>
 
 
-                        });
+            ))}
 
 
+          </div>
 
-                      }}
+        )}
 
 
 
-                    />
 
 
 
-                  </div>
-
-
-                ))
-
-              }
-
-
-
-            </div>
-
-
-          )
-
-
-        }
-
-
-
-
-
-
-        {/* ==========================
-            TOTAL PUBLICATIONS
-        ========================== */}
-
+        {/* TOTAL PUBLICATIONS */}
 
 
         <label style={styles.label}>
@@ -1053,11 +1133,22 @@ Remove Photo
           readOnly
 
         />
-                {/* Telephone Number */}
+
+
+
+
+
+
+
+        {/* ==========================
+            TELEPHONE
+        ========================== */}
+
 
         <label style={styles.label}>
           Telephone Number
         </label>
+
 
 
         <PhoneInput
@@ -1065,7 +1156,8 @@ Remove Photo
           country="et"
 
           enableSearch
-         disableSearchIcon
+
+          disableSearchIcon
 
           countryCodeEditable={false}
 
@@ -1074,19 +1166,23 @@ Remove Photo
           value={form.telephone}
 
 
-          onChange={(phone, country) => {
 
-  setForm({
+          onChange={(phone,country)=>{
 
-    ...form,
 
-    telephone: `+${phone}`,
+            setForm({
 
-    country: country.name
+              ...form,
 
-  });
+              telephone:`+${phone}`,
 
-}}
+              country:country.name
+
+            });
+
+
+          }}
+
 
 
           inputProps={{
@@ -1098,11 +1194,13 @@ Remove Photo
           }}
 
 
+
           containerStyle={{
 
             width:"100%"
 
           }}
+
 
 
           inputStyle={{
@@ -1117,15 +1215,22 @@ Remove Photo
 
           }}
 
+
         />
 
 
 
-        {/* Email */}
+
+
+
+
+        {/* EMAIL */}
+
 
         <label style={styles.label}>
           Email Address
         </label>
+
 
 
         <input
@@ -1149,43 +1254,82 @@ Remove Photo
 
 
 
+
+
+
         {/* ORCID */}
+
 
         <label style={styles.label}>
           ORCID ID
         </label>
 
 
+
         <input
-  style={styles.input}
-  type="text"
-  name="orcid"
-  value={form.orcid}
-  onChange={(e) => {
-    let value = e.target.value.trim();
 
-    // If the user pastes a browser URL like:
-    // https://orcid.org/my-orcid?orcid=0000-0001-7786-3400
-    if (value.includes("my-orcid?orcid=")) {
-      value = "https://orcid.org/" + value.split("my-orcid?orcid=")[1];
-    }
+          style={styles.input}
 
-    setForm({
-      ...form,
-      orcid: value,
-    });
-  }}
-  placeholder="https://orcid.org/0000-0001-7786-3400"
-/>
+          type="text"
+
+          name="orcid"
+
+          value={form.orcid}
 
 
 
+          onChange={(e)=>{
 
-        {/* Current Status */}
+
+            let value =
+              e.target.value.trim();
+
+
+
+            if(value.includes("my-orcid?orcid=")){
+
+
+              value =
+              "https://orcid.org/" +
+
+              value.split(
+                "my-orcid?orcid="
+              )[1];
+
+            }
+
+
+
+            setForm({
+
+              ...form,
+
+              orcid:value
+
+            });
+
+
+          }}
+
+
+
+          placeholder="https://orcid.org/0000-0001-7786-3400"
+
+        />
+
+
+
+
+
+
+
+        {/* CURRENT STATUS */}
+
 
         <label style={styles.label}>
           Current Status
         </label>
+
 
 
         <select
@@ -1202,18 +1346,20 @@ Remove Photo
 
         >
 
+
           <option value="Active">
             Active
           </option>
 
 
-         <option value="Study Leave">
-  Study Leave
-</option>
+          <option value="Study Leave">
+            Study Leave
+          </option>
 
-<option value="Sabbatical Leave">
-  Sabbatical Leave
-</option>
+
+          <option value="Sabbatical Leave">
+            Sabbatical Leave
+          </option>
 
 
           <option value="Retired">
@@ -1236,7 +1382,11 @@ Remove Photo
 
 
 
-        {/* Save Button */}
+
+
+
+        {/* SAVE BUTTON */}
+
 
         <button
 
@@ -1248,16 +1398,9 @@ Remove Photo
 
         >
 
-          {
-
-            loading
-
+          {loading
             ? "Saving..."
-
-            : "Save Faculty"
-
-          }
-
+            : "Save Faculty"}
 
         </button>
 
@@ -1270,136 +1413,153 @@ Remove Photo
 
   );
 
+
 }
+
+
+
+
+// ===============================
+// STYLES
+// ===============================
+
+
 const styles = {
+
 
   heading: {
 
-    textAlign: "center",
+    textAlign:"center",
 
-    color: "#1e3a8a",
+    color:"#1e3a8a",
 
-    marginBottom: "25px",
+    marginBottom:"25px",
 
-    fontSize: "30px",
+    fontSize:"30px",
 
-    fontWeight: "bold",
+    fontWeight:"bold",
 
   },
+
 
 
   form: {
 
-    display: "grid",
+    display:"grid",
 
-    gap: "16px",
+    gap:"16px",
 
-    background: "#ffffff",
+    background:"#ffffff",
 
-    padding: "35px",
+    padding:"35px",
 
-    borderRadius: "12px",
+    borderRadius:"12px",
 
-    maxWidth: "750px",
+    maxWidth:"750px",
 
-    margin: "30px auto",
+    margin:"30px auto",
 
-    boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+    boxShadow:"0 8px 20px rgba(0,0,0,0.12)",
 
   },
+
 
 
   label: {
 
-    fontWeight: "600",
+    fontWeight:"600",
 
-    color: "#374151",
+    color:"#374151",
 
-    marginBottom: "-8px",
+    marginBottom:"-8px",
 
-    fontSize: "15px",
+    fontSize:"15px",
 
   },
+
 
 
   input: {
 
-    width: "100%",
+    width:"100%",
 
-    padding: "12px",
+    padding:"12px",
 
-    border: "1px solid #d1d5db",
+    border:"1px solid #d1d5db",
 
-    borderRadius: "8px",
+    borderRadius:"8px",
 
-    fontSize: "15px",
+    fontSize:"15px",
 
-    outline: "none",
+    outline:"none",
 
-    boxSizing: "border-box",
+    boxSizing:"border-box",
 
-    backgroundColor: "#ffffff",
+    backgroundColor:"#ffffff",
 
   },
+
 
 
   button: {
 
-    background: "#2563eb",
+    background:"#2563eb",
 
-    color: "#ffffff",
+    color:"#ffffff",
 
-    padding: "14px",
+    padding:"14px",
 
-    border: "none",
+    border:"none",
 
-    borderRadius: "8px",
+    borderRadius:"8px",
 
-    cursor: "pointer",
+    cursor:"pointer",
 
-    fontSize: "17px",
+    fontSize:"17px",
 
-    fontWeight: "bold",
+    fontWeight:"bold",
 
-    marginTop: "10px",
+    marginTop:"10px",
 
   },
+
 
 
   secondaryButton: {
 
-    background: "#059669",
+    background:"#059669",
 
-    color: "#ffffff",
+    color:"#ffffff",
 
-    padding: "12px",
+    padding:"12px",
 
-    border: "none",
+    border:"none",
 
-    borderRadius: "8px",
+    borderRadius:"8px",
 
-    cursor: "pointer",
+    cursor:"pointer",
 
-    fontSize: "15px",
+    fontSize:"15px",
 
-    fontWeight: "bold",
+    fontWeight:"bold",
 
   },
 
 
+
   publicationBox: {
 
-    background: "#f9fafb",
+    background:"#f9fafb",
 
-    padding: "20px",
+    padding:"20px",
 
-    borderRadius: "10px",
+    borderRadius:"10px",
 
-    border: "1px solid #e5e7eb",
+    border:"1px solid #e5e7eb",
 
-    display: "grid",
+    display:"grid",
 
-    gap: "12px",
+    gap:"12px",
 
   },
 
