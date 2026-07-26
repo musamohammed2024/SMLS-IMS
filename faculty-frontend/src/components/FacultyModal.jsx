@@ -949,41 +949,27 @@ objectFit:"cover"
 
 
 <button
-
 type="button"
-
 onClick={()=>{
 
 handleChange({
 
 target:{
-
 name:"photo",
-
-value:""
-
+value:null
 }
 
 });
 
 }}
-
 style={{
-
 background:"#dc2626",
-
 color:"#fff",
-
 border:"none",
-
 padding:"8px 15px",
-
 borderRadius:"6px",
-
 cursor:"pointer"
-
 }}
-
 >
 
 Remove Photo

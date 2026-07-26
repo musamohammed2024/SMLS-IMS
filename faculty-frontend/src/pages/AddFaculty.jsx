@@ -254,18 +254,68 @@ export default function AddFaculty() {
 
 
         <input
+  style={styles.input}
+  type="file"
+  accept="image/*"
+  onChange={(e)=>{
+    setPhoto(e.target.files[0]);
+  }}
+/>
 
-          style={styles.input}
 
-          type="file"
+{photo && (
 
-          accept="image/*"
+<div
+style={{
+  marginTop:"15px",
+  display:"flex",
+  alignItems:"center",
+  gap:"15px"
+}}
+>
 
-          onChange={(e)=>
-            setPhoto(e.target.files[0])
-          }
+<img
 
-        />
+src={URL.createObjectURL(photo)}
+
+alt="Preview"
+
+style={{
+  width:"80px",
+  height:"80px",
+  borderRadius:"50%",
+  objectFit:"cover",
+  border:"2px solid #2563eb"
+}}
+
+/>
+
+
+<button
+
+type="button"
+
+onClick={()=>setPhoto(null)}
+
+style={{
+background:"#dc2626",
+color:"#fff",
+border:"none",
+padding:"8px 15px",
+borderRadius:"6px",
+cursor:"pointer"
+}}
+
+>
+
+Remove Photo
+
+</button>
+
+
+</div>
+
+)}
 
 
 
