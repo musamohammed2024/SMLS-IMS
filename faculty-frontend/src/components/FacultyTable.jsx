@@ -267,23 +267,19 @@ export default function FacultyTable({
                 >
 
                   {/* PHOTO */}
-                  <td style={styles.td}>
-                    {item.photo ? (
-                      <img
-  src={
-    item.photo.startsWith("http")
-      ? item.photo
-      : `${import.meta.env.VITE_API_URL.replace("/api", "")}${item.photo}`
-  }
-  alt="Faculty"
-  style={styles.photo}
-/>
-                    ) : (
-                      <div style={styles.noPhoto}>
-                        👤
-                      </div>
-                    )}
-                  </td>
+<td style={styles.td}>
+  {item.photo ? (
+    <img
+      src={item.photo}
+      alt="Faculty"
+      style={styles.photo}
+    />
+  ) : (
+    <div style={styles.noPhoto}>
+      👤
+    </div>
+  )}
+</td>
 
 
                   {/* NAME */}

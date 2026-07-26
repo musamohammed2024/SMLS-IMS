@@ -875,7 +875,130 @@ style={input}
 </div>
 
 
+{/* ================= PHOTO ================= */}
 
+<div>
+
+<label style={label}>
+Faculty Photo
+</label>
+
+
+<input
+
+type="file"
+
+name="photo"
+
+accept="image/*"
+
+onChange={handleChange}
+
+style={input}
+
+/>
+
+
+
+{
+form.photo && (
+
+<div
+style={{
+marginTop:"10px",
+display:"flex",
+alignItems:"center",
+gap:"15px"
+}}
+>
+
+
+{
+
+form.photo && (
+
+<img
+
+src={
+typeof form.photo === "string"
+?
+form.photo
+:
+URL.createObjectURL(form.photo)
+}
+
+alt="Faculty"
+
+style={{
+
+width:"60px",
+
+height:"60px",
+
+borderRadius:"50%",
+
+objectFit:"cover"
+
+}}
+
+/>
+
+)
+
+}
+
+
+<button
+
+type="button"
+
+onClick={()=>{
+
+handleChange({
+
+target:{
+
+name:"photo",
+
+value:""
+
+}
+
+});
+
+}}
+
+style={{
+
+background:"#dc2626",
+
+color:"#fff",
+
+border:"none",
+
+padding:"8px 15px",
+
+borderRadius:"6px",
+
+cursor:"pointer"
+
+}}
+
+>
+
+Remove Photo
+
+</button>
+
+
+</div>
+
+)
+
+}
+
+
+</div>
 
 
 {/* ================= STATUS ================= */}

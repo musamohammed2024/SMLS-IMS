@@ -120,19 +120,17 @@ export default function AddFaculty() {
 
   const handleChange = (e)=>{
 
+  const { name, value, files } = e.target;
 
-    setForm({
+  setForm({
 
-      ...form,
+    ...form,
 
-      [e.target.name]:
-        e.target.value
+    [name]: files ? files[0] : value
 
-    });
+  });
 
-
-  };
-
+};
 
 
 
