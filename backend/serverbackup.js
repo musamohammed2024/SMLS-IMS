@@ -167,40 +167,91 @@ app.use(
 // CORS CONFIGURATION
 // ======================================
 
+
 const allowedOrigins = [
 
-  "https://smls-ims.vercel.app"
+  "http://localhost:5173",
 
-];
+  "http://localhost:5174",
+
+  "http://localhost:3000",
+
+  process.env.FRONTEND_URL
+
+].filter(Boolean);
+
+
+
 
 
 app.use(
-  cors({
-    origin:(origin, callback)=>{
 
-      if(!origin){
-        return callback(null, true);
-      }
+cors({
 
-      if(allowedOrigins.includes(origin)){
-        return callback(null, true);
-      }
+origin:(origin,callback)=>{
 
-      console.warn(
-        "Blocked CORS origin:",
-        origin
-      );
 
-      return callback(
-        new Error("CORS blocked")
-      );
+if(!origin){
 
-    },
+return callback(null,true);
 
-    credentials:true
+}
 
-  })
+
+
+
+
+if(
+
+allowedOrigins.includes(origin)
+
+){
+
+return callback(null,true);
+
+}
+
+
+
+
+
+console.warn(
+
+"Blocked CORS origin:",
+
+origin
+
 );
+
+
+
+return callback(
+
+new Error(
+"CORS blocked"
+)
+
+);
+
+
+},
+
+
+
+credentials:true
+
+
+
+})
+
+);
+
+
+
+
+
+
+
 
 
 // ======================================
