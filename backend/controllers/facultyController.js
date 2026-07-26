@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Faculty = require("../models/Faculty");
 const Activity = require("../models/Activity");
 const validator = require("validator");
+const cloudinary = require("../config/cloudinary");
 
 
 
@@ -595,6 +596,23 @@ safeNumber(req.body.serviceYear);
 
 
 if(req.file){
+
+  if(updated && updated.photo){
+
+    const publicId =
+      updated.photo
+      .split("/")
+      .slice(-2)
+      .join("/")
+      .split(".")[0];
+
+
+    await cloudinary.uploader.destroy(
+      publicId
+    );
+
+  }
+
 
   updateData.photo =
   req.file.path;
