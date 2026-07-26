@@ -360,23 +360,15 @@ req.body.currentStatus || "Active",
 photo:
 
 req.file
-
 ?
-
-`/uploads/${req.file.filename}`
-
+req.file.path
 :
-
 ""
 
 });
 
 
-
-
-
 res.status(201).json(faculty);
-
 
 
 } catch (error) {
@@ -604,8 +596,8 @@ safeNumber(req.body.serviceYear);
 
 if(req.file){
 
-updateData.photo =
-`/uploads/${req.file.filename}`;
+  updateData.photo =
+  req.file.path;
 
 }
 
@@ -721,23 +713,13 @@ await Activity.create({
 });
 
 res.json({
+
   success: true,
-  message: "Faculty deleted successfully."
-});
 
-
-
-
-res.json({
-
-success:true,
-
-message:
-"Faculty deleted successfully."
+  message:
+  "Faculty deleted successfully."
 
 });
-
-
 
 }catch(error){
 

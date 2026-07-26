@@ -1,159 +1,39 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-
-
+const cloudinary = require("../config/cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 
 // ======================================
-// UPLOAD DIRECTORY
+// CLOUDINARY STORAGE
 // ======================================
 
+const storage = new CloudinaryStorage({
 
-const uploadDirectory =
-path.join(
+  cloudinary: cloudinary,
 
-  __dirname,
+  params: {
 
-  "../uploads"
+    folder: "faculty_photos",
 
-);
+    allowed_formats: [
+      "jpg",
+      "jpeg",
+      "png",
+      "webp"
+    ],
 
-
-
-if(!fs.existsSync(uploadDirectory)){
-
-
-fs.mkdirSync(
-
-  uploadDirectory,
-
-  {
-
-    recursive:true
+    transformation: [
+      {
+        width: 500,
+        height: 500,
+        crop: "limit",
+        quality: "auto"
+      }
+    ]
 
   }
 
-);
-
-
-}
-
-
-
-
-
-
-
-
-// ======================================
-// STORAGE
-// ======================================
-
-
-const storage =
-multer.diskStorage({
-
-
-destination:(req,file,cb)=>{
-
-
-cb(
-
-null,
-
-uploadDirectory
-
-);
-
-
-},
-
-
-
-
-
-filename:(req,file,cb)=>{
-
-
-const uniqueName =
-
-Date.now()
-
-+
-
-"-"
-
-+
-
-Math.round(Math.random()*1000000000);
-
-
-
-
-
-
-let extension = "";
-
-
-
-switch(file.mimetype){
-
-
-case "image/jpeg":
-
-extension=".jpg";
-
-break;
-
-
-
-case "image/png":
-
-extension=".png";
-
-break;
-
-
-
-case "image/webp":
-
-extension=".webp";
-
-break;
-
-
-
-default:
-
-extension="";
-
-}
-
-
-
-
-
-cb(
-
-null,
-
-uniqueName + extension
-
-);
-
-
-
-}
-
-
-
 });
-
-
-
-
-
 
 
 
@@ -162,73 +42,37 @@ uniqueName + extension
 // FILE FILTER
 // ======================================
 
-
-const fileFilter =
-(req,file,cb)=>{
+const fileFilter = (req, file, cb) => {
 
 
-const allowedTypes=[
+  const allowedTypes = [
 
-"image/jpeg",
+    "image/jpeg",
+    "image/png",
+    "image/webp"
 
-"image/png",
-
-"image/webp"
-
-];
+  ];
 
 
 
+  if (
+    allowedTypes.includes(file.mimetype)
+  ) {
 
+    cb(null, true);
 
+  } else {
 
-if(
+    cb(
+      new Error(
+        "Only JPG, PNG and WEBP images are allowed."
+      ),
+      false
+    );
 
-allowedTypes.includes(
-
-file.mimetype
-
-)
-
-){
-
-
-cb(
-
-null,
-
-true
-
-);
-
-
-}
-
-else{
-
-
-cb(
-
-new Error(
-
-"Only JPG, PNG and WEBP images are allowed."
-
-),
-
-false
-
-);
-
-
-}
-
+  }
 
 };
-
-
-
-
-
 
 
 
@@ -237,40 +81,23 @@ false
 // MULTER CONFIG
 // ======================================
 
+const upload = multer({
 
-const upload =
-multer({
+  storage,
 
-
-storage,
-
-
-fileFilter,
+  fileFilter,
 
 
+  limits: {
 
-limits:{
+    fileSize:
+      2 * 1024 * 1024,
 
+    files: 1
 
-fileSize:
-
-2 *
-
-1024 *
-
-1024,
-
-
-files:1
-
-
-}
-
+  }
 
 });
-
-
-
 
 
 
