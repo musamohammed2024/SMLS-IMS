@@ -345,23 +345,26 @@ return (
       <div style={styles.photoSection}>
 
         {
-          formData.photo ? (
+  photoFile || formData.photo ? (
 
-            <img
-              src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${formData.photo}`}
-              alt="Faculty"
-              style={styles.photo}
-            />
+    <img
+      src={
+        photoFile
+          ? URL.createObjectURL(photoFile)
+          : `${import.meta.env.VITE_API_URL.replace("/api", "")}${formData.photo}`
+      }
+      alt="Faculty"
+      style={styles.photo}
+    />
 
-          ) : (
+  ) : (
 
-            <div style={styles.noPhoto}>
-              👤
-            </div>
+    <div style={styles.noPhoto}>
+      👤
+    </div>
 
-          )
-        }
-
+  )
+}
         <div>
 
           <label style={styles.label}>

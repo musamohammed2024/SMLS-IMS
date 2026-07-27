@@ -920,11 +920,9 @@ form.photo && (
 <img
 
 src={
-typeof form.photo === "string"
-?
-form.photo
-:
-URL.createObjectURL(form.photo)
+  form.photo instanceof File
+    ? URL.createObjectURL(form.photo)
+    : form.photo
 }
 
 alt="Faculty"
@@ -953,13 +951,12 @@ type="button"
 onClick={()=>{
 
 handleChange({
-
-target:{
-name:"photo",
-value:null
-}
-
+  target: {
+    name: "photo",
+    files: null
+  }
 });
+
 
 }}
 style={{
