@@ -794,7 +794,9 @@ export default function AddFaculty() {
             Lecturer
           </option>
 
-
+           <option value="Graduate Assistant">
+Graduate Assistant
+</option>
           <option value="Technical Assistant">
             Technical Assistant
           </option>
@@ -832,21 +834,46 @@ export default function AddFaculty() {
 
 
 
-        <input
+        <select
+style={styles.input}
+name="currentPosition"
+value={form.currentPosition}
+onChange={handleChange}
+>
 
-          style={styles.input}
+<option value="">
+Select Current Position
+</option>
 
-          type="text"
+<option value="Dean">
+Dean
+</option>
 
-          name="currentPosition"
+<option value="Vice Dean">
+Vice Dean
+</option>
 
-          value={form.currentPosition}
+<option value="Department Head">
+Department Head
+</option>
 
-          onChange={handleChange}
+<option value="Program Coordinator">
+Program Coordinator
+</option>
 
-          placeholder="Enter current position"
+<option value="Instructor">
+Instructor
+</option>
 
-        />
+<option value="Researcher">
+Researcher
+</option>
+
+<option value="Other">
+Other
+</option>
+
+</select>
 
 
 

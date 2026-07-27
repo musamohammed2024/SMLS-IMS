@@ -693,7 +693,7 @@ textAlign:"center"
 type="number"
 min="0"
 value={
-form.publicationHistory?.[year] ?? 0
+form.publicationsByYear?.[year] ?? 0
 }
 onChange={(e)=>
 handlePublicationChange(

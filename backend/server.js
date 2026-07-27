@@ -169,6 +169,7 @@ app.use(
 
 const allowedOrigins = [
 
+  "http://localhost:5173",
   "https://smls-ims.vercel.app"
 
 ];

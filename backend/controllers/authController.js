@@ -360,7 +360,8 @@ const loginUser = async(req,res)=>{
 
 
 
-
+console.log("Stored password:", user.password);
+console.log("Entered password:", password);
 
     const isMatch =
     await bcrypt.compare(
@@ -370,6 +371,8 @@ const loginUser = async(req,res)=>{
       user.password
 
     );
+
+    console.log("Password match:", isMatch);
 
 
 
@@ -541,11 +544,19 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail =
+email.toLowerCase().trim();
 
-    const user = await User.findOne({
-      email: cleanEmail
-    });
+console.log("Login email:", cleanEmail);
+
+const user =
+await User.findOne({
+
+  email: cleanEmail
+
+});
+
+console.log("User found:", user);
 
     if (!user) {
       return res.status(404).json({

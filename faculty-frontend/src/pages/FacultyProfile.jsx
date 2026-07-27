@@ -146,13 +146,17 @@ export default function FacultyProfile() {
 
           <img
 
-           src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${faculty.photo}`}
+src={
+  faculty.photo.startsWith("http")
+    ? faculty.photo
+    : `${import.meta.env.VITE_API_URL.replace("/api","")}${faculty.photo}`
+}
 
-            style={styles.photo}
+style={styles.photo}
 
-            alt="faculty"
+alt="faculty"
 
-          />
+/>
 
           :
 

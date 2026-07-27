@@ -430,11 +430,13 @@ style={styles.filter}
 
 <option>Active</option>
 
-<option>On Leave</option>
-
+<option>Active</option>
+<option>Sabbatical Leave</option>
+<option>Study Leave</option>
 <option>Retired</option>
-
-<option>Inactive</option>
+<option>Resigned</option>
+<option>Deceased</option>
+<option>Other</option>
 
 </select>
 

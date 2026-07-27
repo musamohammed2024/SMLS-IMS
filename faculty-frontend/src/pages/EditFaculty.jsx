@@ -21,6 +21,7 @@ export default function EditFaculty() {
   const [error, setError] = useState("");
 
   const [photoFile, setPhotoFile] = useState(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
 
   const [otherQualification, setOtherQualification] = useState("");
   const [otherSpecialization, setOtherSpecialization] = useState("");
@@ -44,9 +45,9 @@ export default function EditFaculty() {
 
     serviceYear: 0,
 
-    numberOfPublications: 0,
+    totalPublications: 0,
 
-    publicationHistory: {},
+    publicationsByYear: {},
 
     country: "Ethiopia",
 
@@ -83,8 +84,14 @@ export default function EditFaculty() {
     console.log("========== BACKEND RESPONSE ==========");
     console.log(res.data);
     console.log("======================================");
+   
 
     const faculty = res.data.faculty || res.data.data || res.data;
+
+   console.log("Faculty object:", faculty);
+console.log("Photo path:", faculty.photo);
+
+    console.log("PHOTO:", faculty.photo);
 
     setFormData({
       title: faculty.title || "",
@@ -98,9 +105,9 @@ export default function EditFaculty() {
 
       semesterLoad: faculty.semesterLoad || 0,
       serviceYear: faculty.serviceYear || 0,
-      numberOfPublications: faculty.numberOfPublications || 0,
+      totalPublications: faculty.totalPublications || 0,
 
-      publicationHistory: faculty.publicationHistory || {},
+      publicationsByYear: faculty.publicationsByYear || {},
 
       country: faculty.country || "Ethiopia",
       countryCode: faculty.countryCode || "+251",
@@ -138,11 +145,29 @@ export default function EditFaculty() {
 
 };
 
+
+
 const handlePhoto = (e) => {
 
   if (e.target.files.length > 0) {
     setPhotoFile(e.target.files[0]);
   }
+
+};
+
+
+// ADD THIS BELOW handlePhoto
+
+const handleRemovePhoto = () => {
+
+  setPhotoFile(null);
+
+  setRemovePhoto(true);
+
+  setFormData((prev)=>({
+    ...prev,
+    photo:""
+  }));
 
 };
 
@@ -180,13 +205,30 @@ const handleCountryChange = (e) => {
 
 const handlePublicationChange = (year, value) => {
 
-  setFormData((prev) => ({
-    ...prev,
-    publicationHistory: {
-      ...prev.publicationHistory,
-      [year]: Number(value)
-    }
-  }));
+  setFormData((prev) => {
+
+    const updatedPublications = {
+      ...prev.publicationsByYear,
+      [year]: Number(value) || 0
+    };
+
+
+    const total = Object.values(updatedPublications)
+      .reduce(
+        (sum, number) => sum + Number(number || 0),
+        0
+      );
+
+
+    return {
+      ...prev,
+
+      publicationsByYear: updatedPublications,
+
+      totalPublications: total
+    };
+
+  });
 
 };
 
@@ -227,7 +269,7 @@ const handleSubmit = async (e) => {
 
     Object.keys(finalData).forEach((key) => {
 
-      if (key === "publicationHistory") {
+      if (key === "publicationsByYear") {
 
         data.append(
           key,
@@ -247,14 +289,32 @@ const handleSubmit = async (e) => {
 
     if (photoFile) {
 
-      data.append(
-        "photo",
-        photoFile
-      );
+  data.append(
+    "photo",
+    photoFile
+  );
 
-    }
+}
 
-    await axios.put(
+
+if(removePhoto){
+
+  data.append(
+    "removePhoto",
+    "true"
+  );
+
+}
+
+console.log("========== FRONTEND SENDING ==========");
+
+for (let pair of data.entries()) {
+  console.log(pair[0], pair[1]);
+}
+
+console.log("=====================================");
+    
+await axios.put(
 
       `${API}/${id}`,
 
@@ -345,14 +405,16 @@ return (
       <div style={styles.photoSection}>
 
         {
-  photoFile || formData.photo ? (
+  !removePhoto && (photoFile || formData.photo) ? (
 
     <img
       src={
-        photoFile
-          ? URL.createObjectURL(photoFile)
-          : `${import.meta.env.VITE_API_URL.replace("/api", "")}${formData.photo}`
-      }
+  photoFile
+    ? URL.createObjectURL(photoFile)
+    : formData.photo.startsWith("http")
+      ? formData.photo
+      : `${import.meta.env.VITE_API_URL.replace("/api", "")}${formData.photo}`
+}
       alt="Faculty"
       style={styles.photo}
     />
@@ -367,17 +429,38 @@ return (
 }
         <div>
 
-          <label style={styles.label}>
-            Change Photo
-          </label>
+<label style={styles.label}>
+  Change Photo
+</label>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handlePhoto}
-          />
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e)=>{
+    setRemovePhoto(false);
+    handlePhoto(e);
+  }}
+/>
 
-        </div>
+
+<button
+  type="button"
+  onClick={handleRemovePhoto}
+  style={{
+    marginTop:"10px",
+    background:"#dc2626",
+    color:"#fff",
+    border:"none",
+    padding:"8px 15px",
+    borderRadius:"6px",
+    cursor:"pointer"
+  }}
+>
+  🗑 Remove Photo
+</button>
+
+
+</div>
 
       </div>
 
@@ -401,15 +484,12 @@ return (
           >
 
             <option value="">Select Title</option>
-            <option value="Prof.">Prof.</option>
-            <option value="Assoc. Prof.">Assoc. Prof.</option>
-            <option value="Dr.">Dr.</option>
-            <option value="Mr.">Mr.</option>
-            <option value="Mrs.">Mrs.</option>
-            <option value="Ms.">Ms.</option>
-            <option value="Miss">Miss</option>
-            <option value="Rev.">Rev.</option>
-            <option value="Eng.">Eng.</option>
+<option value="Professor">Professor</option>
+<option value="Dr.">Dr.</option>
+<option value="Mr.">Mr.</option>
+<option value="Mrs.">Mrs.</option>
+<option value="Ms.">Ms.</option>
+<option value="Miss">Miss</option>
 
           </select>
 
@@ -450,7 +530,7 @@ return (
 
             <option value="Male">Male</option>
             <option value="Female">Female</option>
-            <option value="Other">Other</option>
+            
 
           </select>
 
@@ -471,13 +551,12 @@ return (
           >
 
             <option value="">Select Qualification</option>
-            <option value="Post Doc">Post Doc</option>
-            <option value="PhD">PhD</option>
-            <option value="MSc">MSc</option>
-            <option value="BSc">BSc</option>
-            <option value="Diploma">Diploma</option>
-            <option value="Certificate">Certificate</option>
-            <option value="Other">Other</option>
+<option value="Postdoctoral">Postdoctoral</option>
+<option value="PhD">PhD</option>
+<option value="MSc">MSc</option>
+<option value="BSc">BSc</option>
+<option value="Diploma">Diploma</option>
+<option value="Other">Other</option>
 
           </select>
 
@@ -528,6 +607,10 @@ return (
             <option value="Hematology">
               Hematology
             </option>
+
+            <option value="Infectious Disease">
+  Infectious Disease
+</option>
 
             <option value="Clinical Chemistry">
               Clinical Chemistry
@@ -587,33 +670,41 @@ return (
 
             <option value="">Select Academic Rank</option>
 
-            <option value="Graduate Assistant">
-              Graduate Assistant
-            </option>
+<option value="Professor">
+  Professor
+</option>
 
-            <option value="Assistant Lecturer">
-              Assistant Lecturer
-            </option>
+<option value="Associate Professor">
+  Associate Professor
+</option>
 
-            <option value="Lecturer">
-              Lecturer
-            </option>
+<option value="Assistant Professor">
+  Assistant Professor
+</option>
 
-            <option value="Assistant Professor">
-              Assistant Professor
-            </option>
+<option value="Lecturer">
+  Lecturer
+</option>
 
-            <option value="Associate Professor">
-              Associate Professor
-            </option>
+<option value="Graduate Assistant">
+  Graduate Assistant
+</option>
 
-            <option value="Professor">
-              Professor
-            </option>
+<option value="Technical Assistant">
+  Technical Assistant
+</option>
 
-            <option value="Other">
-              Other
-            </option>
+<option value="Lab Assistant">
+  Lab Assistant
+</option>
+
+<option value="Secretary">
+  Secretary
+</option>
+
+<option value="Other">
+  Other
+</option>
 
           </select>
 
@@ -749,12 +840,15 @@ return (
           </label>
 
           <input
-            type="number"
-            name="numberOfPublications"
-            value={formData.numberOfPublications}
-            onChange={handleChange}
-            style={styles.input}
-          />
+  type="number"
+  name="totalPublications"
+  value={formData.totalPublications}
+  readOnly
+  style={{
+    ...styles.input,
+    background:"#f1f5f9"
+  }}
+/>
 
         </div>
 
@@ -807,7 +901,7 @@ return (
                     type="number"
                     min="0"
                     value={
-                      formData.publicationHistory?.[year] || ""
+                      formData.publicationsByYear?.[year] || ""
                     }
                     onChange={(e) =>
                       handlePublicationChange(
@@ -966,20 +1060,32 @@ return (
           >
 
             <option value="Active">
-              Active
-            </option>
+  Active
+</option>
 
-            <option value="On Leave">
-              On Leave
-            </option>
+<option value="Sabbatical Leave">
+  Sabbatical Leave
+</option>
 
-            <option value="Retired">
-              Retired
-            </option>
+<option value="Study Leave">
+  Study Leave
+</option>
 
-            <option value="Inactive">
-              Inactive
-            </option>
+<option value="Retired">
+  Retired
+</option>
+
+<option value="Resigned">
+  Resigned
+</option>
+
+<option value="Deceased">
+  Deceased
+</option>
+
+<option value="Other">
+  Other
+</option>
 
           </select>
 

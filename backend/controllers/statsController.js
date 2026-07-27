@@ -43,7 +43,7 @@ const getDashboardStats = async (req, res) => {
 
 
         /*
-          publicationHistory example:
+          publicationsByYear example:
 
           {
             "2010": 10,
@@ -54,11 +54,11 @@ const getDashboardStats = async (req, res) => {
         */
 
 
-        if (f.publicationHistory) {
+        if (f.publicationsByYeary) {
 
 
           Object.values(
-            f.publicationHistory
+            f.publicationsByYear
           ).forEach((value) => {
 
             publications += Number(value) || 0;

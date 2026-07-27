@@ -402,7 +402,15 @@ res.status(201).json(faculty);
 // ==========================================
 
 const updateFaculty = async(req,res)=>{
-  console.log("UPDATE ORCID:", JSON.stringify(req.body.orcid));
+
+console.log("========== UPDATE ROUTE HIT ==========");
+console.log("REQUEST BODY:");
+console.log(req.body);
+
+console.log("REQUEST FILE:");
+console.log(req.file);
+
+console.log("UPDATE ORCID:", JSON.stringify(req.body.orcid));
 
 try{
 
@@ -595,30 +603,32 @@ safeNumber(req.body.serviceYear);
 
 
 
-if(req.file){
+// Get the existing faculty first
+const existingFaculty = await Faculty.findById(id);
 
-  if(updated && updated.photo){
+if (!existingFaculty) {
+  return res.status(404).json({
+    message: "Faculty not found."
+  });
+}
 
-    const publicId =
-      updated.photo
+if (req.file) {
+
+  // Delete the old Cloudinary image
+  if (existingFaculty.photo) {
+
+    const publicId = existingFaculty.photo
       .split("/")
       .slice(-2)
       .join("/")
       .split(".")[0];
 
-
-    await cloudinary.uploader.destroy(
-      publicId
-    );
-
+    await cloudinary.uploader.destroy(publicId);
   }
 
-
-  updateData.photo =
-  req.file.path;
-
+  // Save the new image URL
+  updateData.photo = req.file.path;
 }
-
 
 
 
@@ -670,15 +680,19 @@ res.json(updated);
 
 }catch (error) {
 
-  console.error("UPDATE ERROR:");
+  console.error("========== UPDATE ERROR ==========");
   console.error(error);
+  console.error(error.stack);
+  console.error(error.errors);
 
   res.status(500).json({
     success: false,
     message: error.message,
+    error
   });
 
 }
+
 }; 
 // ==========================================
 // DELETE FACULTY

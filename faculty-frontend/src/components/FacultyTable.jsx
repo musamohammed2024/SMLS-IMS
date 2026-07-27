@@ -44,76 +44,114 @@ export default function FacultyTable({
   });
 
 
-  // ======================================
-  // DOWNLOAD FACULTY INFORMATION
-  // ======================================
+  /// ======================================
+// DOWNLOAD FACULTY INFORMATION
+// ======================================
 
-  const downloadContacts = () => {
-    const headers = [
-      "Title",
-      "Full Name",
-      "Gender",
-      "Qualification",
-      "Field of Specialization",
-      "Academic Rank",
-      "Current Position",
-      "Semester Load",
-      "Service Years",
-      "Total Publications",
-      "Telephone",
-      "Email",
-      "ORCID",
-      "Country",
-      "Current Status",
-    ];
+const downloadContacts = () => {
 
-    const rows = filteredFaculty.map((f) => [
-      f.title || "",
-      f.fullName || "",
-      f.gender || "",
-      f.qualification || "",
-      f.fieldOfSpecialization || "",
-      f.academicRank || "",
-      f.currentPosition || "",
-      f.semesterLoad ?? 0,
-      f.serviceYear ?? 0,
-      f.totalPublications ?? 0,
-      f.telephone || "",
-      f.email || "",
-      f.orcid || "",
-      f.country || "",
-      f.currentStatus || "",
-    ]);
-
-    const csv = [headers, ...rows]
-      .map((row) =>
-        row
-          .map((value) =>
-            `"${String(value).replace(/"/g, '""')}"`
-          )
-          .join(",")
-      )
-      
-      .join("\n");
+  const headers = [
+    "ID",
+    "Title",
+    "Full Name",
+    "Gender",
+    "Qualification",
+    "Field of Specialization",
+    "Academic Rank",
+    "Current Position",
+    "Semester Load",
+    "Service Years",
+    "Total Publications",
+    "Publication History",
+    "Country",
+    "Telephone",
+    "Email",
+    "ORCID",
+    "Current Status",
+    "Photo"
+  ];
 
 
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
-    });
+  const rows = filteredFaculty.map((f) => [
 
-    const url = URL.createObjectURL(blob);
+    f._id || "",
 
-    const link = document.createElement("a");
+    f.title || "",
 
-    link.href = url;
-    link.download = "Faculty_Information.csv";
+    f.fullName || "",
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    f.gender || "",
 
-    URL.revokeObjectURL(url);
-  };
+    f.qualification || "",
+
+    f.fieldOfSpecialization || "",
+
+    f.academicRank || "",
+
+    f.currentPosition || "",
+
+    f.semesterLoad ?? 0,
+
+    f.serviceYear ?? 0,
+
+    f.totalPublications ?? 0,
+
+    JSON.stringify(f.publicationsByYear || {}),
+
+    f.country || "",
+
+
+    f.telephone || "",
+
+    f.email || "",
+
+    f.orcid || "",
+
+    f.currentStatus || "",
+
+    f.photo || ""
+
+  ]);
+
+
+  const csv = [headers, ...rows]
+    .map(row =>
+      row
+        .map(value =>
+          `"${String(value).replace(/"/g, '""')}"`
+        )
+        .join(",")
+    )
+    .join("\n");
+
+
+  const blob = new Blob(
+    [csv],
+    { type:"text/csv;charset=utf-8;" }
+  );
+
+
+  const url = URL.createObjectURL(blob);
+
+
+  const link = document.createElement("a");
+
+  link.href = url;
+
+  link.download = "Faculty_Information.csv";
+
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+
+  URL.revokeObjectURL(url);
+
+};
+    
 
 
   // ======================================
@@ -270,10 +308,14 @@ export default function FacultyTable({
 <td style={styles.td}>
   {item.photo ? (
     <img
-      src={item.photo}
-      alt="Faculty"
-      style={styles.photo}
-    />
+  src={
+    item.photo.startsWith("http")
+      ? item.photo
+      : `${import.meta.env.VITE_API_URL.replace("/api","")}${item.photo}`
+  }
+  alt="Faculty"
+  style={styles.photo}
+/>
   ) : (
     <div style={styles.noPhoto}>
       👤
