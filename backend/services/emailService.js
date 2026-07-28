@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+console.log("RUNNING EMAIL SERVICE: SMTP 587 IPv4");
+
 const sendResetEmail = async (email, resetLink) => {
   await transporter.sendMail({
     from: `"Faculty MIS" <${process.env.EMAIL_USER}>`,
