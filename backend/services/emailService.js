@@ -3,6 +3,9 @@ const nodemailer = require("nodemailer");
 
 console.log("EMAIL SERVICE LOADED - IPv4 mode");
 
+console.log("EMAIL USER:", process.env.EMAIL_USER);
+console.log("EMAIL PASS EXISTS:", !!process.env.EMAIL_PASS);
+
 dns.setDefaultResultOrder("ipv4first");
 
 const transporter = nodemailer.createTransport({
@@ -29,11 +32,13 @@ const sendResetEmail = async (email, resetLink) => {
 
   console.log("Attempting to send reset email to:", email);
 
+  try {
   await transporter.verify();
 
   console.log("SMTP verification succeeded");
 
   await transporter.sendMail({
+
     from: `"Faculty MIS" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Password Reset",
@@ -58,6 +63,11 @@ const sendResetEmail = async (email, resetLink) => {
   });
 
   console.log("Email sent successfully");
+
+  } catch (error) {
+  console.error("SMTP ERROR:", error);
+  throw error;
+}
 };
 
 module.exports = sendResetEmail;
