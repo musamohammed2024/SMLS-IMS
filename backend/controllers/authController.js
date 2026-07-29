@@ -294,18 +294,27 @@ const loginUser = async(req,res)=>{
 
 
 
-    if(!user){
+    if (!user) {
+  return res.status(401).json({
+    message: "Invalid email or password."
+  });
+}
 
+// ===============================
+// ACCOUNT LOCK CHECK
+// ===============================
 
-      return res.status(401).json({
+if (user.lockUntil && user.lockUntil > Date.now()) {
 
-        message:
-        "Invalid email or password."
+  const minutesLeft = Math.ceil(
+    (user.lockUntil - Date.now()) / 60000
+  );
 
-      });
+  return res.status(423).json({
+    message: `Account locked. Try again in ${minutesLeft} minute(s).`
+  });
 
-
-    }
+}
 
 
 
@@ -382,76 +391,73 @@ console.log("Entered password:", password);
 
 
 
-    if(!isMatch){
+    if (!isMatch) {
+
+  user.loginAttempts += 1;
+
+  if (user.loginAttempts >= 5) {
+
+    user.lockUntil =
+      Date.now() + 15 * 60 * 1000;
+
+    user.loginAttempts = 0;
+
+  }
+
+  await user.save();
+
+  return res.status(401).json({
+
+    message:
+      user.lockUntil
+        ? "Too many failed login attempts. Account locked for 15 minutes."
+        : "Invalid email or password."
+
+  });
+
+}
 
 
-      return res.status(401).json({
-
-        message:
-        "Invalid email or password."
-
-      });
+    
 
 
+
+
+
+
+
+
+
+        // ===============================
+    // RESET FAILED LOGIN ATTEMPTS
+    // AFTER SUCCESSFUL LOGIN
+    // ===============================
+
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+    await user.save();
+
+    // ===============================
+    // GENERATE JWT TOKEN
+    // ===============================
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET missing");
     }
 
-
-
-
-
-
-
-
-
-    if(!process.env.JWT_SECRET){
-
-
-      throw new Error(
-
-        "JWT_SECRET missing"
-
-      );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    const token =
-    jwt.sign(
-
-
+    const token = jwt.sign(
       {
-
-        id:user._id,
-
-        role:user.role
-
-
+        id: user._id,
+        role: user.role,
       },
-
-
       process.env.JWT_SECRET,
-
-
       {
-
-        expiresIn:"1h"
-
+        expiresIn: "1h",
       }
-
-
     );
 
 
-
-
+      
 
 
 
@@ -556,32 +562,70 @@ await User.findOne({
 
 });
 
+// ===============================
+// LIMIT PASSWORD RESET REQUESTS
+// Maximum 3 requests within 30 minutes
+// ===============================
+
+if (user) {
+
+  const now = Date.now();
+
+  if (
+    user.passwordResetLastAttempt &&
+    (now - user.passwordResetLastAttempt) < (30 * 60 * 1000) &&
+    user.passwordResetAttempts >= 3
+  ) {
+
+    return res.status(429).json({
+
+      message:
+      "Too many password reset requests. Please try again after 30 minutes."
+
+    });
+
+  }
+
+}
+
 console.log("User found:", user);
 
-    if (!user) {
-      return res.status(404).json({
-        message: "No account found with that email."
-      });
-    }
+if (!user) {
+  return res.status(200).json({
+    success: true,
+    message: "If an account with that email exists, a password reset link has been sent."
+  });
+}
 
-
-    // Generate secure reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
+// Generate secure reset token
+const resetToken = crypto.randomBytes(32).toString("hex");
 
 
     // Save token and expiry (1 hour)
     user.resetPasswordToken = resetToken;
 
     user.resetPasswordExpires =
-      Date.now() + 3600000;
+  Date.now() + 30 * 60 * 1000;
 
+   const now = Date.now();
+
+if (
+  !user.passwordResetLastAttempt ||
+  now - user.passwordResetLastAttempt > 30 * 60 * 1000
+) {
+  user.passwordResetAttempts = 1;
+} else {
+  user.passwordResetAttempts++;
+}
+
+user.passwordResetLastAttempt = now;
 
     await user.save();
 
 
 
     const resetLink =
-      `http://localhost:5173/reset-password/${resetToken}`;
+     `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
 
 
@@ -593,26 +637,17 @@ console.log("User found:", user);
 
 
     res.status(200).json({
-
-      success: true,
-
-      message:
-      "Password reset link has been sent to your email."
-
-    });
+  success: true,
+  message:
+    "If an account with that email exists, a password reset link has been sent."
+});
 
 
 
   } catch (error) {
 
 
-    console.error(
-
-      "FORGOT PASSWORD ERROR:",
-
-      error.message
-
-    );
+    console.error("FORGOT PASSWORD ERROR:", error);
 
 
 
@@ -667,6 +702,9 @@ const resetPassword = async (req, res) => {
 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
+
+    user.passwordResetAttempts = 0;
+user.passwordResetLastAttempt = undefined;
 
     await user.save();
 

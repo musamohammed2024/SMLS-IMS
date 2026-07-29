@@ -1,36 +1,37 @@
 const dns = require("dns");
 const nodemailer = require("nodemailer");
 
+console.log("EMAIL SERVICE LOADED - IPv4 mode");
+
 dns.setDefaultResultOrder("ipv4first");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  port: 465,
+  secure: true,
+  family: 4,
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
+
   tls: {
     rejectUnauthorized: false,
   },
 });
 
-console.log("RUNNING EMAIL SERVICE: SMTP 587 IPv4");
-
 const sendResetEmail = async (email, resetLink) => {
+
   console.log("Attempting to send reset email to:", email);
 
-  try {
-    await transporter.verify();
-    console.log("SMTP verification succeeded");
-  } catch (err) {
-    console.error("SMTP verification failed:", err);
-    throw err;
-  }
+  await transporter.verify();
+
+  console.log("SMTP verification succeeded");
 
   await transporter.sendMail({
     from: `"Faculty MIS" <${process.env.EMAIL_USER}>`,
@@ -41,19 +42,22 @@ const sendResetEmail = async (email, resetLink) => {
 
       <p>You requested to reset your password.</p>
 
-      <p>Click the link below to reset it:</p>
+      <p>Click the button below to reset your password.</p>
 
-      <p>
-        <a href="${resetLink}">
-          Reset Password
-        </a>
-      </p>
+      <a href="${resetLink}"
+         style="padding:10px 20px;
+                background:#1976d2;
+                color:white;
+                text-decoration:none;
+                border-radius:5px;">
+        Reset Password
+      </a>
 
-      <p>If you did not request this, simply ignore this email.</p>
+      <p>If you did not request this, ignore this email.</p>
     `,
   });
 
-  console.log("Reset email sent successfully.");
+  console.log("Email sent successfully");
 };
 
 module.exports = sendResetEmail;
