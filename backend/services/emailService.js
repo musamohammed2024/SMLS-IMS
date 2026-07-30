@@ -33,11 +33,11 @@ const transporter = nodemailer.createTransport({
 
   },
 
-  connectionTimeout: 30000,
+  connectionTimeout: 15000,
 
-  greetingTimeout: 30000,
+greetingTimeout: 15000,
 
-  socketTimeout: 30000,
+socketTimeout: 15000,
 
   tls: {
 
@@ -98,12 +98,18 @@ const sendResetEmail = async (email, resetLink) => {
 
     };
 
-    console.log("STEP 2: Calling transporter.sendMail()...");
+    console.log("STEP 2: Verifying SMTP connection...");
 
-    const info = await transporter.sendMail(mailOptions);
+await transporter.verify();
 
-    console.log("STEP 3: Email sent successfully.");
-    console.log("Message ID:", info.messageId);
+console.log("SMTP verification succeeded");
+
+console.log("STEP 3: Calling transporter.sendMail()...");
+
+const info = await transporter.sendMail(mailOptions);
+
+console.log("STEP 4: Email sent successfully.");
+console.log("Message ID:", info.messageId);
 
     return info;
 

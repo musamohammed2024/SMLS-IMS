@@ -369,8 +369,7 @@ if (user.lockUntil && user.lockUntil > Date.now()) {
 
 
 
-console.log("Stored password:", user.password);
-console.log("Entered password:", password);
+
 
     const isMatch =
     await bcrypt.compare(
@@ -381,7 +380,7 @@ console.log("Entered password:", password);
 
     );
 
-    console.log("Password match:", isMatch);
+   
 
 
 
